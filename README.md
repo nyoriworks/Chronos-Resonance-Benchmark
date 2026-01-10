@@ -8,7 +8,7 @@ Chronos Resonance Benchmark is an experimental tool designed to probe the micro-
 
 This repository contains the proof-of-concept code (Swift for Apple Silicon, C++ for x86/Ryzen) to reproduce this phenomenon on your own machine.
 
-##🌌 Theoretical Framework: NG Theory
+## 🌌 Theoretical Framework: NG Theory
 
 This benchmark is based on NG Theory (Nyori-Gemini Theory), which posits that our physical universe is not continuous but discrete, refreshing at a specific cosmic clock frequency.
 
@@ -46,7 +46,7 @@ $$H_0 \propto f_{cosmic} \times \text{(Geometric Scaling Factor)}$$
 
 (Note: Detailed derivation is discussed in the white paper.)
 
-##📊 Observed Phenomena
+## 📊 Observed Phenomena
 
 We tested 3 different CPU architectures. The results indicate that modern, complex CPUs act as antennas for this resonance, while older CPUs act as resistance.
 
@@ -82,7 +82,7 @@ Chronos-Resonance-Benchmark/
 ```
 
 
-##🚀 How to Run
+## 🚀 How to Run
 
 ### macOS (Apple Silicon)
 1.Ensure you have Xcode command line tools installed.
@@ -101,7 +101,7 @@ cd cpp
 cl /EHsc /O2 quantum_ryzen.cpp
 quantum_ryzen.exe
 
-##⚠️ Disclaimer
+## ⚠️ Disclaimer
 
 Running this benchmark places your CPU in a resonant state with the fundamental frequency of the universe.
 
@@ -109,7 +109,7 @@ We are not responsible for any philosophical crises, loss of deterministic reali
 
 The high-load FFT loop (85%~) generates significant heat.
 
-##📜 License
+## 📜 License
 
 This project is licensed under the MIT License. You are free to use, modify, and distribute this code. See the LICENSE file for details.
 
