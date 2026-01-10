@@ -78,12 +78,18 @@ Chronos-Resonance-Benchmark/
 ├── README.md               # You are here
 ├── LICENSE                 # MIT License
 ├── cpp/                    # For Windows / Linux (x86_64)
-│   ├── quantum_ryzen.cpp
+│   ├── quantum_benchmark.cpp
+│   ├── QuantumLib.hpp
 │   └── CMakeLists.txt
-├── swift/                  # For macOS (Apple Silicon M1/M2/M3)
+├── swift/                  # For macOS (Apple Silicon)
 │   ├── Package.swift
 │   └── Sources/
-│       └── YukinekoBenchmark/
+│       ├── YukinekoBenchmark/
+│       │   └── main.swift
+│       └── CShim/
+│           ├── shim.c
+│           └── include/
+│               └── CShim.h
 └── results/                # Log data from various CPUs
     ├── apple_m2_log.txt
     ├── amd_ryzen_log.txt
