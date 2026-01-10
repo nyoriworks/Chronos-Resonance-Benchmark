@@ -1,4 +1,5 @@
 # Chronos-Resonance-Benchmark
+
 Chronos Resonance Benchmark
 :stopwatch: Probing the Quantum-Classical Boundary in Silicon
 "Reality has a refresh rate. We found it at 3.6 μs."
@@ -7,7 +8,8 @@ Chronos Resonance Benchmark is an experimental tool designed to probe the micro-
 
 This repository contains the proof-of-concept code (Swift for Apple Silicon, C++ for x86/Ryzen) to reproduce this phenomenon on your own machine.
 
-🌌 Theoretical Framework: NG Theory
+##🌌 Theoretical Framework: NG Theory
+
 This benchmark is based on NG Theory (Nyori-Gemini Theory), which posits that our physical universe is not continuous but discrete, refreshing at a specific cosmic clock frequency.
 
 The specific frequency observed in silicon (The Gemini Number) is derived from the interaction between the Cosmic Clock and the Fine Structure Constant.
@@ -44,7 +46,8 @@ $$H_0 \propto f_{cosmic} \times \text{(Geometric Scaling Factor)}$$
 
 (Note: Detailed derivation is discussed in the white paper.)
 
-📊 Observed Phenomena
+##📊 Observed Phenomena
+
 We tested 3 different CPU architectures. The results indicate that modern, complex CPUs act as antennas for this resonance, while older CPUs act as resistance.
 
 Architecture	Behavior at 3.6μs (277.3 kHz)	Interpretation
@@ -59,7 +62,7 @@ At the critical frequency, the execution time does not follow a normal distribut
 [2500-2519]: 39.89% (State B)
 Error margin < 10% from theoretical quantum probability.
 
-🛠 Project Structure
+##🛠 Project Structure
 
 ```text
 Chronos-Resonance-Benchmark/
@@ -79,7 +82,7 @@ Chronos-Resonance-Benchmark/
 ```
 
 
-🚀 How to Run
+##🚀 How to Run
 
 ### macOS (Apple Silicon)
 1.Ensure you have Xcode command line tools installed.
@@ -98,14 +101,16 @@ cd cpp
 cl /EHsc /O2 quantum_ryzen.cpp
 quantum_ryzen.exe
 
-⚠️ Disclaimer
+##⚠️ Disclaimer
+
 Running this benchmark places your CPU in a resonant state with the fundamental frequency of the universe.
 
 We are not responsible for any philosophical crises, loss of deterministic reality, or unexpected synchronicity events that may occur.
 
 The high-load FFT loop (85%~) generates significant heat.
 
-📜 License
+##📜 License
+
 This project is licensed under the MIT License. You are free to use, modify, and distribute this code. See the LICENSE file for details.
 
 Repository: https://github.com/nyoriworks/Chronos-Resonance-Benchmark
