@@ -1,7 +1,13 @@
 # Chronos-Resonance-Benchmark
 
+### :stopwatch: Probing the Quantum-Classical Boundary in Silicon
+
+![Language](https://img.shields.io/badge/language-Swift%20%7C%20C%2B%2B-orange)
+![License](https://img.shields.io/badge/license-MIT-blue)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18206934.svg)](https://doi.org/10.5281/zenodo.18206934)  ← ★ここに追加！
 Chronos Resonance Benchmark
 :stopwatch: Probing the Quantum-Classical Boundary in Silicon
+
 "Reality has a refresh rate. We found it at 3.6 μs."
 
 Chronos Resonance Benchmark is an experimental tool designed to probe the micro-timing anomalies in modern CPU architectures. Contrary to the classical deterministic model, we have observed that CPUs exhibit quantum-like probabilistic behaviors (Bistability/Multistability) when specific instruction cycles align with the 277.3 kHz frequency region.
