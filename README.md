@@ -23,15 +23,24 @@ $$
 
 ### 2. The Cosmic Clock (Quantum Sea)
 The fundamental rotation frequency of the universe (Vacuum fluctuation rate).
-This is derived by multiplying the matter frequency by the inverse of the Fine Structure Constant ($\alpha^{-1} \approx 137$).
-
-$$
-f_{cosmic} = f_{matter} \times \alpha^{-1}
-$$
+Why 277.3 kHz? This is merely a shadow of the fundamental rotation speed of the universe ($f_{cosmic}$).NG Theory derives this 38 MHz value from two independent approaches, proving its consistency.Approach A: The Fine Structure Constant ($\alpha$)The connection between the cosmic vacuum (light) and matter (silicon).
 
 $$
 38.0 \text{ MHz} \approx 277.3 \text{ kHz} \times 137.036
 $$
+
+Approach B: Elastic Spacetime & Entropy (The Dark Matter Derivation)
+We calculated the rotational velocity of the time dimension ($\omega_{time}$) based on the lifetime of Positronium ($T_{anti}$) and the Dark Matter ratio ($k_{phase}$).
+・$T_{anti}$: Lifetime of Positronium $\approx 1.42 \times 10^{-7} s$ (Limit of endurance on the time plane).
+・$k_{phase}$: Phase shift factor derived from Dark Matter/Baryonic Matter ratio ($\approx 5.4$).
+
+$$\omega_{time} = \frac{2\pi \times k_{phase}}{T_{anti}} \approx \frac{6.28 \times 5.4}{1.42 \times 10^{-7}} \approx 2.39 \times 10^8 \text{ rad/s}$$
+
+Converting angular velocity to frequency:
+
+$$f_{cosmic} = \frac{\omega_{time}}{2\pi} \approx \mathbf{38.0 \text{ MHz}}$$
+
+Conclusion: The universe refreshes at 38 MHz. Matter resonates at 1/137 of that speed (277.3 kHz).
 
 ### 3. The Time Window (Event Horizon)
 The maximum duration a deterministic calculation can maintain coherence before collapsing into probability.
