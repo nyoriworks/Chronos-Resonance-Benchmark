@@ -4,7 +4,7 @@
 
 ![Language](https://img.shields.io/badge/language-Swift%20%7C%20C%2B%2B-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18206934.svg)](https://doi.org/10.5281/zenodo.18206934)  ← ★ここに追加！
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18206934.svg)](https://doi.org/10.5281/zenodo.18206934)
 Chronos Resonance Benchmark
 :stopwatch: Probing the Quantum-Classical Boundary in Silicon
 
