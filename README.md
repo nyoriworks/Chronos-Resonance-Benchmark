@@ -60,6 +60,7 @@ At the critical frequency, the execution time does not follow a normal distribut
 Error margin < 10% from theoretical quantum probability.
 
 🛠 Project Structure
+
 Chronos-Resonance-Benchmark/
 ├── README.md               # You are here
 ├── LICENSE                 # MIT License
@@ -74,6 +75,7 @@ Chronos-Resonance-Benchmark/
     ├── apple_m2_log.txt
     ├── amd_ryzen_log.txt
     └── intel_skylake_log.txt
+
 
 🚀 How to Run
 
