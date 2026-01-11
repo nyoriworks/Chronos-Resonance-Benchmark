@@ -187,7 +187,7 @@ func performFFTLoad(level: FFTLoadLevel) {
     }
 }
 
-// MARK: - Qubit (Same as before)
+// MARK: - Qubit
 struct Complex {
     var real: Double
     var imag: Double
@@ -347,6 +347,36 @@ func measureSingle(tick: UInt64, fftLevel: FFTLoadLevel) -> Int {
     return Int(baseOps) - Int(loadOps)
 }
 
+// MARK: - Quick Analysis (for scheduled mode)
+struct QuickStats {
+    let avg: Double
+    let stdDev: Double
+    let peak: Int
+    let peakPercent: Double
+}
+
+func quickAnalyze(data: [Int]) -> QuickStats {
+    let sum = data.reduce(0, +)
+    let avg = Double(sum) / Double(data.count)
+
+    let variance = data.map { pow(Double($0) - avg, 2) }.reduce(0, +) / Double(data.count)
+    let stdDev = sqrt(variance)
+
+    // Find peak bin
+    var histogram = [Int: Int]()
+    for value in data {
+        let bin = (value / 20) * 20
+        histogram[bin, default: 0] += 1
+    }
+
+    let sorted = histogram.sorted { $0.value > $1.value }
+    let peak = sorted.first?.key ?? 0
+    let peakCount = sorted.first?.value ?? 0
+    let peakPercent = Double(peakCount) / Double(data.count) * 100.0
+
+    return QuickStats(avg: avg, stdDev: stdDev, peak: peak, peakPercent: peakPercent)
+}
+
 // MARK: - Analysis
 func analyze(name: String, data: [Int]) {
     let sum = data.reduce(0, +)
@@ -379,13 +409,188 @@ func analyze(name: String, data: [Int]) {
     print("")
 }
 
+// MARK: - Scheduled Mode (30-minute intervals)
+func runScheduledMode(cal: CalibrationData) {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+
+    let timeFormatter = DateFormatter()
+    timeFormatter.dateFormat = "HH:mm"
+
+    let fileFormatter = DateFormatter()
+    fileFormatter.dateFormat = "yyyy-MM-dd"
+
+    print("=== Scheduled Mode: 30-Minute Interval Measurements ===")
+    print("Measuring at: 00:00, 00:30, 01:00, ... 23:00, 23:30")
+    print("Total: 48 measurements × 32 patterns = 1,536 data points/day")
+    print("  - 12 Static (4 FFT × 3 Ticks)")
+    print("  - 20 Dynamic (4 FFT × 5 Patterns)")
+    print("========================================================\n")
+
+    // Create log file
+    let logFileName = "time_surface_\(fileFormatter.string(from: Date())).csv"
+    let logPath = FileManager.default.currentDirectoryPath + "/" + logFileName
+
+    // Write CSV header
+    let csvHeader =
+        "timestamp,hour,minute,type,fft_level,pattern,avg,std_dev,peak_bin,peak_percent\n"
+    try? csvHeader.write(toFile: logPath, atomically: true, encoding: .utf8)
+
+    print("Log file: \(logPath)\n")
+
+    let iterations = 30_000  // 30K per pattern (32 patterns × 30K = 960K total per interval)
+
+    let tickConfigs: [(String, UInt64)] = [
+        ("-1", cal.tickMinus1),
+        ("0", cal.tickCenter),
+        ("+1", cal.tickPlus1),
+    ]
+
+    // Dynamic patterns: (name, pattern array)
+    let dynamicPatterns: [(String, [UInt64])] = [
+        (
+            "Original",
+            [
+                cal.tickMinus1, cal.tickMinus1, cal.tickCenter, cal.tickPlus1, cal.tickPlus1,
+                cal.tickCenter,
+            ]
+        ),
+        (
+            "Alternating",
+            [
+                cal.tickPlus1, cal.tickMinus1, cal.tickPlus1, cal.tickMinus1, cal.tickPlus1,
+                cal.tickMinus1,
+            ]
+        ),
+        (
+            "Block",
+            [
+                cal.tickPlus1, cal.tickPlus1, cal.tickPlus1, cal.tickMinus1, cal.tickMinus1,
+                cal.tickMinus1,
+            ]
+        ),
+        (
+            "Mixed",
+            [
+                cal.tickCenter, cal.tickMinus1, cal.tickPlus1, cal.tickCenter, cal.tickPlus1,
+                cal.tickMinus1,
+            ]
+        ),
+        (
+            "Sweep",
+            [
+                cal.tickMinus1, cal.tickCenter, cal.tickPlus1, cal.tickPlus1, cal.tickCenter,
+                cal.tickMinus1,
+            ]
+        ),
+    ]
+
+    var lastRunTime = ""
+    var lastPrintedMinute = -1
+
+    while true {
+        let now = Date()
+        let calendar = Calendar.current
+        let minute = calendar.component(.minute, from: now)
+        let second = calendar.component(.second, from: now)
+        let timeStr = String(format: "%02d:%02d", minute, second)
+
+        // Schedule:
+        // [XX:15:45] Mac Solo
+        // [XX:29:59] All (Sync)
+        let isMacSolo = (minute == 15 && second == 45)
+        let isAll = (minute == 29 && second == 59)
+
+        let isScheduledTime = (isMacSolo || isAll)
+
+        if isScheduledTime && lastRunTime != timeStr {
+            lastRunTime = timeStr
+
+            let timestamp = dateFormatter.string(from: now)
+            let hour = calendar.component(.hour, from: now)
+
+            let typeLabel = isMacSolo ? "MacSolo" : "All"
+            print("\n[[\(timestamp)] Trigger: \(typeLabel). Starting 3 consecutive runs...")
+
+            // Run 3 times consecutively
+            for runIndex in 1...3 {
+                print("\n--- Run \(runIndex)/3 ---")
+
+                // Refresh timestamp for precise logging if needed, or use launch time
+                // We use the same 'timestamp' for the batch, or updated?
+                // Let's use updated time for CSV accuracy
+                let runTimestamp = dateFormatter.string(from: Date())
+
+                // Part 1: Static Patterns
+                print("  [Static 12 patterns]")
+                for fftLevel in FFTLoadLevel.allCases {
+                    for (tickName, tick) in tickConfigs {
+                        var data = [Int]()
+                        for _ in 0..<iterations {
+                            data.append(measureSingle(tick: tick, fftLevel: fftLevel))
+                        }
+
+                        let stats = quickAnalyze(data: data)
+
+                        let csvLine =
+                            "\(runTimestamp),\(hour),\(minute),Static,\(fftLevel.rawValue),Tick\(tickName),\(String(format: "%.2f", stats.avg)),\(String(format: "%.2f", stats.stdDev)),\(stats.peak),\(String(format: "%.2f", stats.peakPercent))\n"
+
+                        if let fileHandle = FileHandle(forWritingAtPath: logPath) {
+                            fileHandle.seekToEndOfFile()
+                            fileHandle.write(csvLine.data(using: .utf8)!)
+                            fileHandle.closeFile()
+                        }
+                    }
+                }
+
+                // Part 2: Dynamic Patterns
+                print("  [Dynamic 20 patterns]")
+                for fftLevel in FFTLoadLevel.allCases {
+                    for (patternName, pattern) in dynamicPatterns {
+                        var data = [Int]()
+                        for i in 0..<iterations {
+                            let tick = pattern[i % 6]
+                            data.append(measureSingle(tick: tick, fftLevel: fftLevel))
+                        }
+
+                        let stats = quickAnalyze(data: data)
+
+                        let csvLine =
+                            "\(runTimestamp),\(hour),\(minute),Dynamic,\(fftLevel.rawValue),\(patternName),\(String(format: "%.2f", stats.avg)),\(String(format: "%.2f", stats.stdDev)),\(stats.peak),\(String(format: "%.2f", stats.peakPercent))\n"
+
+                        if let fileHandle = FileHandle(forWritingAtPath: logPath) {
+                            fileHandle.seekToEndOfFile()
+                            fileHandle.write(csvLine.data(using: .utf8)!)
+                            fileHandle.closeFile()
+                        }
+                    }
+                }
+            }
+            print("3 runs complete. Waiting for next schedule...")
+        }
+
+        if minute != lastPrintedMinute {
+            // Next target calculation
+            // Targets: 15:45, 29:59
+            // Simplified "next" log
+            print("Waiting... (Current: \(minute):\(String(format: "%02d", second)))")
+            lastPrintedMinute = minute
+            Thread.sleep(forTimeInterval: 10)
+        }
+    }
+}
+
 // MARK: - Main
 @main
 struct QuantumTransitionBenchmark {
     static func main() {
         let _ = pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0)
 
-        print("=== Quantum Transition Measurement (Swift - Imported from C++) ===")
+        // Check for scheduled mode
+        let args = CommandLine.arguments
+        let isScheduledMode = args.contains("--scheduled") || args.contains("-s")
+
+        print("=== Quantum Transition Measurement (Swift - NG Theory) ===")
         print("Auto-calibrating for your CPU...\n")
 
         let cal = calibrateCPU()
@@ -394,10 +599,20 @@ struct QuantumTransitionBenchmark {
         print("  Tick \(cal.tickMinus1) → 276.3 kHz (3.619 μs)")
         print("  Tick \(cal.tickCenter) → 277.3 kHz (3.606 μs, center)")
         print("  Tick \(cal.tickPlus1) → 278.3 kHz (3.593 μs)")
+        print("")
 
-        print("\nTarget: 277.3 kHz region (±1 kHz)")
+        if isScheduledMode {
+            runScheduledMode(cal: cal)
+        } else {
+            runFullBenchmark(cal: cal)
+        }
+    }
+
+    static func runFullBenchmark(cal: CalibrationData) {
+        print("Target: 277.3 kHz region (±1 kHz)")
         print("Base Period: 3.6 microseconds")
         print("Iterations: 1,000,000 per measurement")
+        print("Patterns: 32 (12 Static + 20 Dynamic)")
         print("============================================================\n")
 
         // Warmup
@@ -407,20 +622,63 @@ struct QuantumTransitionBenchmark {
         print("Done.\n")
 
         let iterations = 1_000_000
+        var results = [String: [Int]]()
 
-        // Part 1: 12 Patterns (4 FFT x 3 Ticks)
-        print("Part 1: Combined FFT + Tick Variation Tests")
+        // Tick configurations
+        let tickConfigs: [(String, UInt64)] = [
+            ("-1", cal.tickMinus1),
+            ("0", cal.tickCenter),
+            ("+1", cal.tickPlus1),
+        ]
+
+        // Dynamic patterns
+        let dynamicPatterns: [(String, [UInt64])] = [
+            (
+                "Original",
+                [
+                    cal.tickMinus1, cal.tickMinus1, cal.tickCenter, cal.tickPlus1, cal.tickPlus1,
+                    cal.tickCenter,
+                ]
+            ),
+            (
+                "Alternating",
+                [
+                    cal.tickPlus1, cal.tickMinus1, cal.tickPlus1, cal.tickMinus1, cal.tickPlus1,
+                    cal.tickMinus1,
+                ]
+            ),
+            (
+                "Block",
+                [
+                    cal.tickPlus1, cal.tickPlus1, cal.tickPlus1, cal.tickMinus1, cal.tickMinus1,
+                    cal.tickMinus1,
+                ]
+            ),
+            (
+                "Mixed",
+                [
+                    cal.tickCenter, cal.tickMinus1, cal.tickPlus1, cal.tickCenter, cal.tickPlus1,
+                    cal.tickMinus1,
+                ]
+            ),
+            (
+                "Sweep",
+                [
+                    cal.tickMinus1, cal.tickCenter, cal.tickPlus1, cal.tickPlus1, cal.tickCenter,
+                    cal.tickMinus1,
+                ]
+            ),
+        ]
+
+        // Part 1: 12 Static Patterns (4 FFT x 3 Ticks)
+        print("Part 1: Static Patterns (12 = 4 FFT × 3 Ticks)")
         print("--------------------------------------------")
         print("FFT Load: 75% (2.70μs), 80% (2.88μs), 85% (3.06μs), 90% (3.24μs)")
         print("Tick Variation: -1 (276.3kHz), 0 (277.3kHz), +1 (278.3kHz)")
         print("12 combinations x 1M samples each\n")
 
-        var results = [String: [Int]]()
-
         for fftLevel in FFTLoadLevel.allCases {
-            for (tickName, tick) in [
-                ("-1", cal.tickMinus1), ("0", cal.tickCenter), ("+1", cal.tickPlus1),
-            ] {
+            for (tickName, tick) in tickConfigs {
                 let key = "FFT\(fftLevel.rawValue) Tick\(tickName)"
                 print("\(key) (1M)...", terminator: "")
                 fflush(stdout)
@@ -434,28 +692,31 @@ struct QuantumTransitionBenchmark {
             }
         }
 
-        // Part 2: Dynamic Transition
-        print("\nPart 2: Dynamic Transition (4 FFT patterns)")
+        // Part 2: Dynamic Transition (20 = 4 FFT x 5 Patterns)
+        print("\nPart 2: Dynamic Transition (20 = 4 FFT × 5 Patterns)")
         print("--------------------------------------------")
-        print("Pattern: -1→-1→0→+1→+1→0 (1M iterations each)\n")
-
-        let pattern = [
-            cal.tickMinus1, cal.tickMinus1, cal.tickCenter, cal.tickPlus1, cal.tickPlus1,
-            cal.tickCenter,
-        ]
+        print("Patterns:")
+        print("  Original: -1→-1→0→+1→+1→0")
+        print("  Alternating: +1→-1→+1→-1→+1→-1")
+        print("  Block: +1→+1→+1→-1→-1→-1")
+        print("  Mixed: 0→-1→+1→0→+1→-1")
+        print("  Sweep: -1→0→+1→+1→0→-1")
+        print("20 combinations x 1M samples each\n")
 
         for fftLevel in FFTLoadLevel.allCases {
-            let key = "Dynamic FFT\(fftLevel.rawValue)"
-            print("\(key) (1M)...", terminator: "")
-            fflush(stdout)
+            for (patternName, pattern) in dynamicPatterns {
+                let key = "Dynamic FFT\(fftLevel.rawValue) \(patternName)"
+                print("\(key) (1M)...", terminator: "")
+                fflush(stdout)
 
-            var data = [Int]()
-            for i in 0..<iterations {
-                let tick = pattern[i % 6]
-                data.append(measureSingle(tick: tick, fftLevel: fftLevel))
+                var data = [Int]()
+                for i in 0..<iterations {
+                    let tick = pattern[i % 6]
+                    data.append(measureSingle(tick: tick, fftLevel: fftLevel))
+                }
+                results[key] = data
+                print(" done")
             }
-            results[key] = data
-            print(" done")
         }
 
         // Analysis
@@ -463,6 +724,7 @@ struct QuantumTransitionBenchmark {
         print("Statistical Analysis")
         print("============================================================\n")
 
+        // Static analysis
         for fftLevel in FFTLoadLevel.allCases {
             print("--- FFT \(fftLevel.label) + Tick Variations ---\n")
             for tickName in ["-1", "0", "+1"] {
@@ -473,11 +735,14 @@ struct QuantumTransitionBenchmark {
             }
         }
 
-        print("--- Dynamic Transition (4 FFT patterns) ---\n")
+        // Dynamic analysis
+        print("--- Dynamic Transition (5 patterns × 4 FFT) ---\n")
         for fftLevel in FFTLoadLevel.allCases {
-            let key = "Dynamic FFT\(fftLevel.rawValue)"
-            if let data = results[key] {
-                analyze(name: key, data: data)
+            for (patternName, _) in dynamicPatterns {
+                let key = "Dynamic FFT\(fftLevel.rawValue) \(patternName)"
+                if let data = results[key] {
+                    analyze(name: key, data: data)
+                }
             }
         }
 
