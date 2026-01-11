@@ -111,6 +111,7 @@ Chronos-Resonance-Benchmark/
 2.Run the Swift benchmark:
 
 cd swift
+
 swift run -c release YukinekoBenchmark
 
 ### Windows / Linux (x86_64)
@@ -119,8 +120,10 @@ swift run -c release YukinekoBenchmark
 2.Compile directly for minimum overhead:
 
 cd cpp
-cl /EHsc /O2 quantum_ryzen.cpp
-quantum_ryzen.exe
+
+cl /EHsc /O2 quantum_benchmark.cpp
+
+quantum_benchmark.exe
 
 ## ⚠️ Disclaimer
 
