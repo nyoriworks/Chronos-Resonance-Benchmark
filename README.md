@@ -114,6 +114,9 @@ cd swift
 
 swift run -c release YukinekoBenchmark
 
+swift run -c release YukinekoBenchmark --scheduled
+
+
 ### Windows / Linux (x86_64)
 1.Use Visual Studio 2022 command prompt (x64 Native Tools).
 
@@ -121,9 +124,21 @@ swift run -c release YukinekoBenchmark
 
 cd cpp
 
-cl /EHsc /O2 quantum_benchmark.cpp
+cl /O2 /std:c++17 /EHsc quantum_benchmark.cpp
+
+rmdir /s /q build
+
+mkdir build
+
+cd build
+
+cmake .. -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release
+
+cmake --build .
 
 quantum_benchmark.exe
+
+quantum_benchmark.exe --scheduled
 
 ## ⚠️ Disclaimer
 
