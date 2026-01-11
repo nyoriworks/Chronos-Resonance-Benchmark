@@ -2,9 +2,13 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <ctime>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <sstream>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -38,6 +42,45 @@ int measureSingle(uint64_t tick,
   }
 
   return static_cast<int>(baseOps) - static_cast<int>(loadOps);
+}
+
+// Quick stats for scheduled mode
+struct QuickStats {
+  double avg;
+  double stdDev;
+  int peakBin;
+  double peakPercent;
+};
+
+QuickStats quickAnalyze(const std::vector<int> &data) {
+  double sum = 0;
+  for (int v : data)
+    sum += v;
+  double avg = sum / data.size();
+
+  double variance = 0;
+  for (int v : data) {
+    variance += (v - avg) * (v - avg);
+  }
+  variance /= data.size();
+  double stdDev = sqrt(variance);
+
+  // Find peak bin
+  std::map<int, int> histogram;
+  for (int value : data) {
+    int bin = (value / 20) * 20;
+    histogram[bin]++;
+  }
+
+  std::vector<std::pair<int, int>> sorted(histogram.begin(), histogram.end());
+  std::sort(sorted.begin(), sorted.end(),
+            [](const auto &a, const auto &b) { return a.second > b.second; });
+
+  int peakBin = sorted.empty() ? 0 : sorted[0].first;
+  int peakCount = sorted.empty() ? 0 : sorted[0].second;
+  double peakPercent = (double)peakCount / data.size() * 100.0;
+
+  return {avg, stdDev, peakBin, peakPercent};
 }
 
 void analyze(const std::string &name, const std::vector<int> &data) {
@@ -84,19 +127,203 @@ void analyze(const std::string &name, const std::vector<int> &data) {
   std::cout << "\n";
 }
 
-int main() {
-  setHighPriority();
+// Get current time as formatted string
+std::string getCurrentTimeStr() {
+  auto now = std::chrono::system_clock::now();
+  std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+  std::tm *tm = std::localtime(&now_time);
 
-  std::cout << "=== Quantum Transition Measurement (Cross-Platform) ===\n";
-  std::cout << "Auto-calibrating for your CPU...\n\n";
+  std::ostringstream oss;
+  oss << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
+  return oss.str();
+}
 
-  // CPU周波数を測定してキャリブレーション
-  CalibrationData cal = calibrateCPU();
-  printCalibrationInfo(cal);
+// Get current date as formatted string
+std::string getCurrentDateStr() {
+  auto now = std::chrono::system_clock::now();
+  std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+  std::tm *tm = std::localtime(&now_time);
 
-  std::cout << "\nTarget: 277.3 kHz region (±1 kHz)\n";
+  std::ostringstream oss;
+  oss << std::put_time(tm, "%Y-%m-%d");
+  return oss.str();
+}
+
+// Get current hour and minute
+void getCurrentHourMinute(int &hour, int &minute, int &second) {
+  auto now = std::chrono::system_clock::now();
+  std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+  std::tm *tm = std::localtime(&now_time);
+  hour = tm->tm_hour;
+  minute = tm->tm_min;
+  second = tm->tm_sec;
+}
+
+// Scheduled mode: measurements every 30 minutes
+void runScheduledMode(const CalibrationData &cal) {
+  std::cout << "=== Scheduled Mode: 30-Minute Interval Measurements ===\n";
+  std::cout << "Measuring at: 00:00, 00:30, 01:00, ... 23:00, 23:30\n";
+  std::cout << "Total: 48 measurements x 32 patterns = 1,536 data points/day\n";
+  std::cout << "  - 12 Static (4 FFT x 3 Ticks)\n";
+  std::cout << "  - 20 Dynamic (4 FFT x 5 Patterns)\n";
+  std::cout << "========================================================\n\n";
+
+  // Create log file
+  std::string logFileName = "time_surface_" + getCurrentDateStr() + ".csv";
+  std::cout << "Log file: " << logFileName << "\n\n";
+
+  // Write CSV header
+  std::ofstream logFile(logFileName, std::ios::app);
+  if (logFile.tellp() == 0) {
+    logFile << "timestamp,hour,minute,type,fft_level,pattern,avg,std_dev,peak_"
+               "bin,peak_percent\n";
+  }
+  logFile.close();
+
+  const int iterations =
+      30000; // 30K per pattern (32 patterns x 30K = 960K total)
+
+  // FFT load levels
+  struct FFTConfig {
+    const char *name;
+    FFTLoadLevel level;
+  };
+  FFTConfig fftConfigs[] = {{"75%", FFTLoadLevel::LOAD_75_PERCENT},
+                            {"80%", FFTLoadLevel::LOAD_80_PERCENT},
+                            {"85%", FFTLoadLevel::LOAD_85_PERCENT},
+                            {"90%", FFTLoadLevel::LOAD_90_PERCENT}};
+
+  // Static tick configurations
+  struct TickConfig {
+    const char *name;
+    uint64_t tick;
+  };
+  TickConfig tickConfigs[] = {
+      {"-1", cal.tick_minus1}, {"0", cal.tick_center}, {"+1", cal.tick_plus1}};
+
+  // Dynamic patterns
+  struct DynamicPattern {
+    const char *name;
+    uint64_t ticks[6];
+  };
+  DynamicPattern dynamicPatterns[] = {
+      {"Original",
+       {cal.tick_minus1, cal.tick_minus1, cal.tick_center, cal.tick_plus1,
+        cal.tick_plus1, cal.tick_center}},
+      {"Alternating",
+       {cal.tick_plus1, cal.tick_minus1, cal.tick_plus1, cal.tick_minus1,
+        cal.tick_plus1, cal.tick_minus1}},
+      {"Block",
+       {cal.tick_plus1, cal.tick_plus1, cal.tick_plus1, cal.tick_minus1,
+        cal.tick_minus1, cal.tick_minus1}},
+      {"Mixed",
+       {cal.tick_center, cal.tick_minus1, cal.tick_plus1, cal.tick_center,
+        cal.tick_plus1, cal.tick_minus1}},
+      {"Sweep",
+       {cal.tick_minus1, cal.tick_center, cal.tick_plus1, cal.tick_plus1,
+        cal.tick_center, cal.tick_minus1}}};
+
+  std::string lastRunTime = "";
+  int lastPrintedMinute = -1;
+
+  while (true) {
+    int hour, minute, second;
+    getCurrentHourMinute(hour, minute, second);
+
+    char timeStrBuf[10];
+    snprintf(timeStrBuf, sizeof(timeStrBuf), "%02d:%02d", minute, second);
+    std::string timeStr = timeStrBuf;
+
+    // Schedule:
+    // [XX:10:40] Win Solo
+    // [XX:29:59] All (Sync)
+    bool isWinSolo = (minute == 10 && second == 40);
+    bool isAll = (minute == 29 && second == 59);
+
+    bool isScheduledTime = (isWinSolo || isAll);
+
+    if (isScheduledTime && lastRunTime != timeStr) {
+      lastRunTime = timeStr;
+
+      std::string timestamp = getCurrentTimeStr();
+      std::string typeLabel = isWinSolo ? "WinSolo" : "All";
+
+      std::cout << "\n[[" << timestamp << "] Trigger: " << typeLabel
+                << ". Starting 3 consecutive runs...\n";
+
+      // Run 3 times consecutively
+      for (int runIndex = 1; runIndex <= 3; runIndex++) {
+        std::cout << "\n--- Run " << runIndex << "/3 ---\n";
+
+        std::string runTimestamp = getCurrentTimeStr();
+
+        // Part 1: Static Patterns
+        std::cout << "  [Static 12 patterns]\n";
+        for (const auto &fft : fftConfigs) {
+          for (const auto &tick : tickConfigs) {
+            std::vector<int> data;
+            data.reserve(iterations);
+            for (int i = 0; i < iterations; i++) {
+              data.push_back(measureSingle(tick.tick, fft.level));
+            }
+
+            QuickStats stats = quickAnalyze(data);
+
+            // Append to CSV
+            std::ofstream logFile(logFileName, std::ios::app);
+            logFile << runTimestamp << "," << hour << "," << minute
+                    << ",Static," << fft.name << ",Tick" << tick.name << ","
+                    << std::fixed << std::setprecision(2) << stats.avg << ","
+                    << stats.stdDev << "," << stats.peakBin << ","
+                    << stats.peakPercent << "\n";
+            logFile.close();
+          }
+        }
+
+        // Part 2: Dynamic Patterns
+        std::cout << "  [Dynamic 20 patterns]\n";
+        for (const auto &fft : fftConfigs) {
+          for (const auto &pattern : dynamicPatterns) {
+            std::vector<int> data;
+            data.reserve(iterations);
+            for (int i = 0; i < iterations; i++) {
+              uint64_t tick = pattern.ticks[i % 6];
+              data.push_back(measureSingle(tick, fft.level));
+            }
+
+            QuickStats stats = quickAnalyze(data);
+
+            // Append to CSV
+            std::ofstream logFile(logFileName, std::ios::app);
+            logFile << runTimestamp << "," << hour << "," << minute
+                    << ",Dynamic," << fft.name << "," << pattern.name << ","
+                    << std::fixed << std::setprecision(2) << stats.avg << ","
+                    << stats.stdDev << "," << stats.peakBin << ","
+                    << stats.peakPercent << "\n";
+            logFile.close();
+          }
+        }
+      }
+      std::cout << "3 runs complete. Waiting for next schedule...\n";
+    }
+
+    if (minute != lastPrintedMinute) {
+      std::cout << "Waiting... (Current: " << std::setfill('0') << std::setw(2)
+                << minute << ":" << std::setw(2) << second << ")\n";
+      lastPrintedMinute = minute;
+    }
+
+    // Sleep for 0.1s
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+}
+
+// Full benchmark mode
+void runFullBenchmark(const CalibrationData &cal) {
+  std::cout << "\nTarget: 277.3 kHz region (+/-1 kHz)\n";
   std::cout << "Base Period: 3.6 microseconds\n";
   std::cout << "Iterations: 1,000,000 per measurement\n";
+  std::cout << "Patterns: 32 (12 Static + 20 Dynamic)\n";
   std::cout << "========================================================\n\n";
 
   // Warmup
@@ -109,189 +336,153 @@ int main() {
 
   const int iterations = 1000000;
 
-  // Part 1: Combined FFT + Tick Variation Tests
-  // 12 patterns: 4 FFT loads (75%, 80%, 85%, 90%) x 3 Ticks (-1, 0, +1)
-  std::cout << "Part 1: Combined FFT + Tick Variation Tests\n";
+  // FFT load levels
+  struct FFTConfig {
+    const char *name;
+    FFTLoadLevel level;
+  };
+  FFTConfig fftConfigs[] = {{"75%", FFTLoadLevel::LOAD_75_PERCENT},
+                            {"80%", FFTLoadLevel::LOAD_80_PERCENT},
+                            {"85%", FFTLoadLevel::LOAD_85_PERCENT},
+                            {"90%", FFTLoadLevel::LOAD_90_PERCENT}};
+
+  // Tick configurations
+  struct TickConfig {
+    const char *name;
+    uint64_t tick;
+  };
+  TickConfig tickConfigs[] = {
+      {"-1", cal.tick_minus1}, {"0", cal.tick_center}, {"+1", cal.tick_plus1}};
+
+  // Dynamic patterns
+  struct DynamicPattern {
+    const char *name;
+    uint64_t ticks[6];
+  };
+  DynamicPattern dynamicPatterns[] = {
+      {"Original",
+       {cal.tick_minus1, cal.tick_minus1, cal.tick_center, cal.tick_plus1,
+        cal.tick_plus1, cal.tick_center}},
+      {"Alternating",
+       {cal.tick_plus1, cal.tick_minus1, cal.tick_plus1, cal.tick_minus1,
+        cal.tick_plus1, cal.tick_minus1}},
+      {"Block",
+       {cal.tick_plus1, cal.tick_plus1, cal.tick_plus1, cal.tick_minus1,
+        cal.tick_minus1, cal.tick_minus1}},
+      {"Mixed",
+       {cal.tick_center, cal.tick_minus1, cal.tick_plus1, cal.tick_center,
+        cal.tick_plus1, cal.tick_minus1}},
+      {"Sweep",
+       {cal.tick_minus1, cal.tick_center, cal.tick_plus1, cal.tick_plus1,
+        cal.tick_center, cal.tick_minus1}}};
+
+  // Storage for results
+  std::map<std::string, std::vector<int>> results;
+
+  // Part 1: Static Patterns (12 = 4 FFT x 3 Ticks)
+  std::cout << "Part 1: Static Patterns (12 = 4 FFT x 3 Ticks)\n";
   std::cout << "--------------------------------------------\n";
   std::cout
       << "FFT Load: 75% (2.70us), 80% (2.88us), 85% (3.06us), 90% (3.24us)\n";
   std::cout << "Tick Variation: -1 (276.3kHz), 0 (277.3kHz), +1 (278.3kHz)\n";
   std::cout << "12 combinations x 1M samples each\n\n";
 
-  // Storage for 12 patterns
-  std::vector<int> fft75_tick_m1, fft75_tick_0, fft75_tick_p1;
-  std::vector<int> fft80_tick_m1, fft80_tick_0, fft80_tick_p1;
-  std::vector<int> fft85_tick_m1, fft85_tick_0, fft85_tick_p1;
-  std::vector<int> fft90_tick_m1, fft90_tick_0, fft90_tick_p1;
+  for (const auto &fft : fftConfigs) {
+    for (const auto &tick : tickConfigs) {
+      std::string key = std::string("FFT") + fft.name + " Tick" + tick.name;
+      std::cout << key << " (1M)...";
+      std::cout.flush();
 
-  // FFT 75% with all tick variations
-  std::cout << "FFT 75% + Tick -1 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft75_tick_m1.push_back(
-        measureSingle(cal.tick_minus1, FFTLoadLevel::LOAD_75_PERCENT));
+      std::vector<int> data;
+      data.reserve(iterations);
+      for (int i = 0; i < iterations; i++) {
+        data.push_back(measureSingle(tick.tick, fft.level));
+      }
+      results[key] = data;
+      std::cout << " done\n";
+    }
   }
-  std::cout << " done\n";
-  std::cout << "FFT 75% + Tick 0 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft75_tick_0.push_back(
-        measureSingle(cal.tick_center, FFTLoadLevel::LOAD_75_PERCENT));
-  }
-  std::cout << " done\n";
-  std::cout << "FFT 75% + Tick +1 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft75_tick_p1.push_back(
-        measureSingle(cal.tick_plus1, FFTLoadLevel::LOAD_75_PERCENT));
-  }
-  std::cout << " done\n";
 
-  // FFT 80% with all tick variations
-  std::cout << "FFT 80% + Tick -1 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft80_tick_m1.push_back(
-        measureSingle(cal.tick_minus1, FFTLoadLevel::LOAD_80_PERCENT));
-  }
-  std::cout << " done\n";
-  std::cout << "FFT 80% + Tick 0 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft80_tick_0.push_back(
-        measureSingle(cal.tick_center, FFTLoadLevel::LOAD_80_PERCENT));
-  }
-  std::cout << " done\n";
-  std::cout << "FFT 80% + Tick +1 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft80_tick_p1.push_back(
-        measureSingle(cal.tick_plus1, FFTLoadLevel::LOAD_80_PERCENT));
-  }
-  std::cout << " done\n";
-
-  // FFT 85% with all tick variations
-  std::cout << "FFT 85% + Tick -1 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft85_tick_m1.push_back(
-        measureSingle(cal.tick_minus1, FFTLoadLevel::LOAD_85_PERCENT));
-  }
-  std::cout << " done\n";
-  std::cout << "FFT 85% + Tick 0 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft85_tick_0.push_back(
-        measureSingle(cal.tick_center, FFTLoadLevel::LOAD_85_PERCENT));
-  }
-  std::cout << " done\n";
-  std::cout << "FFT 85% + Tick +1 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft85_tick_p1.push_back(
-        measureSingle(cal.tick_plus1, FFTLoadLevel::LOAD_85_PERCENT));
-  }
-  std::cout << " done\n";
-
-  // FFT 90% with all tick variations
-  std::cout << "FFT 90% + Tick -1 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft90_tick_m1.push_back(
-        measureSingle(cal.tick_minus1, FFTLoadLevel::LOAD_90_PERCENT));
-  }
-  std::cout << " done\n";
-  std::cout << "FFT 90% + Tick 0 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft90_tick_0.push_back(
-        measureSingle(cal.tick_center, FFTLoadLevel::LOAD_90_PERCENT));
-  }
-  std::cout << " done\n";
-  std::cout << "FFT 90% + Tick +1 (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    fft90_tick_p1.push_back(
-        measureSingle(cal.tick_plus1, FFTLoadLevel::LOAD_90_PERCENT));
-  }
-  std::cout << " done\n";
-
-  // Part 2: Dynamic Transition with all 4 FFT loads
-  std::cout << "\nPart 2: Dynamic Transition (4 FFT patterns)\n";
+  // Part 2: Dynamic Transition (20 = 4 FFT x 5 Patterns)
+  std::cout << "\nPart 2: Dynamic Transition (20 = 4 FFT x 5 Patterns)\n";
   std::cout << "--------------------------------------------\n";
-  std::cout << "Pattern: -1->-1->0->+1->+1->0 (1M iterations each)\n\n";
+  std::cout << "Patterns:\n";
+  std::cout << "  Original: -1->-1->0->+1->+1->0\n";
+  std::cout << "  Alternating: +1->-1->+1->-1->+1->-1\n";
+  std::cout << "  Block: +1->+1->+1->-1->-1->-1\n";
+  std::cout << "  Mixed: 0->-1->+1->0->+1->-1\n";
+  std::cout << "  Sweep: -1->0->+1->+1->0->-1\n";
+  std::cout << "20 combinations x 1M samples each\n\n";
 
-  const uint64_t pattern[] = {cal.tick_minus1, cal.tick_minus1,
-                              cal.tick_center, cal.tick_plus1,
-                              cal.tick_plus1,  cal.tick_center};
+  for (const auto &fft : fftConfigs) {
+    for (const auto &pattern : dynamicPatterns) {
+      std::string key =
+          std::string("Dynamic FFT") + fft.name + " " + pattern.name;
+      std::cout << key << " (1M)...";
+      std::cout.flush();
 
-  std::vector<int> dyn_75, dyn_80, dyn_85, dyn_90;
-
-  std::cout << "Dynamic FFT 75% (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    dyn_75.push_back(
-        measureSingle(pattern[i % 6], FFTLoadLevel::LOAD_75_PERCENT));
+      std::vector<int> data;
+      data.reserve(iterations);
+      for (int i = 0; i < iterations; i++) {
+        uint64_t tick = pattern.ticks[i % 6];
+        data.push_back(measureSingle(tick, fft.level));
+      }
+      results[key] = data;
+      std::cout << " done\n";
+    }
   }
-  std::cout << " done\n";
-
-  std::cout << "Dynamic FFT 80% (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    dyn_80.push_back(
-        measureSingle(pattern[i % 6], FFTLoadLevel::LOAD_80_PERCENT));
-  }
-  std::cout << " done\n";
-
-  std::cout << "Dynamic FFT 85% (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    dyn_85.push_back(
-        measureSingle(pattern[i % 6], FFTLoadLevel::LOAD_85_PERCENT));
-  }
-  std::cout << " done\n";
-
-  std::cout << "Dynamic FFT 90% (1M)...";
-  std::cout.flush();
-  for (int i = 0; i < iterations; i++) {
-    dyn_90.push_back(
-        measureSingle(pattern[i % 6], FFTLoadLevel::LOAD_90_PERCENT));
-  }
-  std::cout << " done\n";
 
   // Analysis
   std::cout << "\n========================================================\n";
   std::cout << "Statistical Analysis\n";
   std::cout << "========================================================\n\n";
 
-  std::cout << "--- FFT 75% (2.70us) + Tick Variations ---\n\n";
-  analyze("FFT75% Tick-1", fft75_tick_m1);
-  analyze("FFT75% Tick 0", fft75_tick_0);
-  analyze("FFT75% Tick+1", fft75_tick_p1);
+  // Static analysis
+  for (const auto &fft : fftConfigs) {
+    std::cout << "--- FFT " << fft.name << " + Tick Variations ---\n\n";
+    for (const auto &tick : tickConfigs) {
+      std::string key = std::string("FFT") + fft.name + " Tick" + tick.name;
+      analyze(key, results[key]);
+    }
+  }
 
-  std::cout << "--- FFT 80% (2.88us) + Tick Variations ---\n\n";
-  analyze("FFT80% Tick-1", fft80_tick_m1);
-  analyze("FFT80% Tick 0", fft80_tick_0);
-  analyze("FFT80% Tick+1", fft80_tick_p1);
-
-  std::cout << "--- FFT 85% (3.06us) + Tick Variations ---\n\n";
-  analyze("FFT85% Tick-1", fft85_tick_m1);
-  analyze("FFT85% Tick 0", fft85_tick_0);
-  analyze("FFT85% Tick+1", fft85_tick_p1);
-
-  std::cout << "--- FFT 90% (3.24us) + Tick Variations ---\n\n";
-  analyze("FFT90% Tick-1", fft90_tick_m1);
-  analyze("FFT90% Tick 0", fft90_tick_0);
-  analyze("FFT90% Tick+1", fft90_tick_p1);
-
-  std::cout << "--- Dynamic Transition (4 FFT patterns) ---\n\n";
-  analyze("Dynamic FFT75%", dyn_75);
-  analyze("Dynamic FFT80%", dyn_80);
-  analyze("Dynamic FFT85%", dyn_85);
-  analyze("Dynamic FFT90%", dyn_90);
+  // Dynamic analysis
+  std::cout << "--- Dynamic Transition (5 patterns x 4 FFT) ---\n\n";
+  for (const auto &fft : fftConfigs) {
+    for (const auto &pattern : dynamicPatterns) {
+      std::string key =
+          std::string("Dynamic FFT") + fft.name + " " + pattern.name;
+      analyze(key, results[key]);
+    }
+  }
 
   std::cout << "========================================================\n";
   std::cout << "Done.\n";
+}
+
+int main(int argc, char *argv[]) {
+  setHighPriority();
+
+  // Check for scheduled mode
+  bool scheduledMode = false;
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if (arg == "--scheduled" || arg == "-s") {
+      scheduledMode = true;
+    }
+  }
+
+  std::cout << "=== Quantum Transition Measurement (Cross-Platform) ===\n";
+  std::cout << "Auto-calibrating for your CPU...\n\n";
+
+  CalibrationData cal = calibrateCPU();
+  printCalibrationInfo(cal);
+
+  if (scheduledMode) {
+    runScheduledMode(cal);
+  } else {
+    runFullBenchmark(cal);
+  }
 
   return 0;
 }
