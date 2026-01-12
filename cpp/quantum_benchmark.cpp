@@ -234,70 +234,93 @@ void runScheduledMode(const CalibrationData &cal) {
     snprintf(timeStrBuf, sizeof(timeStrBuf), "%02d:%02d", minute, second);
     std::string timeStr = timeStrBuf;
 
-    // Schedule: XX:10:00, XX:29:00, XX:40:00, XX:59:00
-    bool isScheduledTime = (second == 0) && (minute == 10 || minute == 29 ||
-                                             minute == 40 || minute == 59);
+    // Trigger at XX:29:00 or XX:59:00 for 2-minute boundary scan
+    bool isBoundaryScan = (second == 0) && (minute == 29 || minute == 59);
 
-    if (isScheduledTime && lastRunTime != timeStr) {
+    if (isBoundaryScan && lastRunTime != timeStr) {
       lastRunTime = timeStr;
 
+      int boundaryMinute = (minute == 29) ? 30 : 0;
       std::string timestamp = getCurrentTimeStr();
-      std::cout << "\n[[" << timestamp << "] Starting 3 consecutive runs...\n";
 
-      // Run 3 times consecutively
-      for (int runIndex = 1; runIndex <= 3; runIndex++) {
-        std::cout << "\n--- Run " << runIndex << "/3 ---\n";
+      std::cout << "\n[[" << timestamp
+                << "] Starting 2-minute Boundary Scan...\n";
+      std::cout << "  Scanning across " << hour << ":" << std::setfill('0')
+                << std::setw(2) << boundaryMinute << ":00 boundary\n";
 
-        std::string runTimestamp = getCurrentTimeStr();
+      auto scanStart = std::chrono::steady_clock::now();
+      auto scanEnd = scanStart + std::chrono::seconds(120); // 2 minutes
+      int patternIndex = 0;
 
-        // Part 1: Static Patterns
-        std::cout << "  [Static 12 patterns]\n";
-        for (const auto &fft : fftConfigs) {
-          for (const auto &tick : tickConfigs) {
-            std::vector<int> data;
-            data.reserve(iterations);
-            for (int i = 0; i < iterations; i++) {
-              data.push_back(measureSingle(tick.tick, fft.level));
-            }
+      // Build pattern list: 12 static + 20 dynamic = 32 patterns
+      // We'll cycle through them continuously
 
-            QuickStats stats = quickAnalyze(data);
+      while (std::chrono::steady_clock::now() < scanEnd) {
+        int pIdx = patternIndex % 32;
+        std::string measureTimestamp = getCurrentTimeStr();
 
-            // Append to CSV
-            std::ofstream logFile(logFileName, std::ios::app);
-            logFile << runTimestamp << "," << hour << "," << minute
-                    << ",Static," << fft.name << ",Tick" << tick.name << ","
-                    << std::fixed << std::setprecision(2) << stats.avg << ","
-                    << stats.stdDev << "," << stats.peakBin << ","
-                    << stats.peakPercent << "\n";
-            logFile.close();
+        // Get current time for CSV
+        int mHour, mMinute, mSecond;
+        getCurrentHourMinute(mHour, mMinute, mSecond);
+
+        std::vector<int> data;
+        data.reserve(iterations);
+
+        std::string patternType;
+        std::string fftName;
+        std::string patternName;
+
+        if (pIdx < 12) {
+          // Static pattern (index 0-11)
+          int fftIdx = pIdx / 3;
+          int tickIdx = pIdx % 3;
+          patternType = "Static";
+          fftName = fftConfigs[fftIdx].name;
+          patternName = std::string("Tick") + tickConfigs[tickIdx].name;
+
+          for (int i = 0; i < iterations; i++) {
+            data.push_back(measureSingle(tickConfigs[tickIdx].tick,
+                                         fftConfigs[fftIdx].level));
+          }
+        } else {
+          // Dynamic pattern (index 12-31)
+          int dynIdx = pIdx - 12;
+          int fftIdx = dynIdx / 5;
+          int patIdx = dynIdx % 5;
+          patternType = "Dynamic";
+          fftName = fftConfigs[fftIdx].name;
+          patternName = dynamicPatterns[patIdx].name;
+
+          for (int i = 0; i < iterations; i++) {
+            uint64_t tick = dynamicPatterns[patIdx].ticks[i % 6];
+            data.push_back(measureSingle(tick, fftConfigs[fftIdx].level));
           }
         }
 
-        // Part 2: Dynamic Patterns
-        std::cout << "  [Dynamic 20 patterns]\n";
-        for (const auto &fft : fftConfigs) {
-          for (const auto &pattern : dynamicPatterns) {
-            std::vector<int> data;
-            data.reserve(iterations);
-            for (int i = 0; i < iterations; i++) {
-              uint64_t tick = pattern.ticks[i % 6];
-              data.push_back(measureSingle(tick, fft.level));
-            }
+        QuickStats stats = quickAnalyze(data);
 
-            QuickStats stats = quickAnalyze(data);
+        // Append to CSV with precise timestamp
+        std::ofstream logFile(logFileName, std::ios::app);
+        logFile << measureTimestamp << "," << mHour << "," << mMinute << ","
+                << patternType << "," << fftName << "," << patternName << ","
+                << std::fixed << std::setprecision(2) << stats.avg << ","
+                << stats.stdDev << "," << stats.peakBin << ","
+                << stats.peakPercent << "\n";
+        logFile.close();
 
-            // Append to CSV
-            std::ofstream logFile(logFileName, std::ios::app);
-            logFile << runTimestamp << "," << hour << "," << minute
-                    << ",Dynamic," << fft.name << "," << pattern.name << ","
-                    << std::fixed << std::setprecision(2) << stats.avg << ","
-                    << stats.stdDev << "," << stats.peakBin << ","
-                    << stats.peakPercent << "\n";
-            logFile.close();
-          }
+        // Progress indicator every 32 patterns (1 full cycle)
+        if (patternIndex % 32 == 0) {
+          std::cout << "  [" << std::setfill('0') << std::setw(2) << mMinute
+                    << ":" << std::setw(2) << mSecond << "] Cycle "
+                    << (patternIndex / 32 + 1) << "...\n";
         }
+
+        patternIndex++;
       }
-      std::cout << "3 runs complete. Waiting for next schedule...\n";
+
+      std::cout << "Boundary scan complete. " << patternIndex
+                << " patterns recorded.\n";
+      std::cout << "Waiting for next boundary...\n";
     }
 
     if (minute != lastPrintedMinute) {
