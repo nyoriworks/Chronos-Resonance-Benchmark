@@ -488,6 +488,10 @@ func runScheduledMode(cal: CalibrationData) {
     var lastRunTime = ""
     var lastPrintedMinute = -1
 
+    // Timestamp formatter with seconds
+    let preciseFormatter = DateFormatter()
+    preciseFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+
     while true {
         let now = Date()
         let calendar = Calendar.current
@@ -495,88 +499,100 @@ func runScheduledMode(cal: CalibrationData) {
         let second = calendar.component(.second, from: now)
         let timeStr = String(format: "%02d:%02d", minute, second)
 
-        // Schedule:
-        // [XX:15:45] Mac Solo
-        // [XX:29:59] All (Sync)
-        let isMacSolo = (minute == 15 && second == 45)
-        let isAll = (minute == 29 && second == 59)
+        // Trigger at XX:29:00 or XX:59:00 for 2-minute boundary scan
+        let isBoundaryScan = (second == 0) && (minute == 29 || minute == 59)
 
-        let isScheduledTime = (isMacSolo || isAll)
-
-        if isScheduledTime && lastRunTime != timeStr {
+        if isBoundaryScan && lastRunTime != timeStr {
             lastRunTime = timeStr
 
-            let timestamp = dateFormatter.string(from: now)
             let hour = calendar.component(.hour, from: now)
+            let boundaryMinute = (minute == 29) ? 30 : 0
 
-            let typeLabel = isMacSolo ? "MacSolo" : "All"
-            print("\n[[\(timestamp)] Trigger: \(typeLabel). Starting 3 consecutive runs...")
+            print("\n[[\(preciseFormatter.string(from: now))] Starting 2-minute Boundary Scan...")
+            print("  Scanning across \(hour):\(String(format: "%02d", boundaryMinute)):00 boundary")
 
-            // Run 3 times consecutively
-            for runIndex in 1...3 {
-                print("\n--- Run \(runIndex)/3 ---")
+            let scanEndTime = now.addingTimeInterval(120)  // 2 minutes
+            var patternIndex = 0
 
-                // Refresh timestamp for precise logging if needed, or use launch time
-                // We use the same 'timestamp' for the batch, or updated?
-                // Let's use updated time for CSV accuracy
-                let runTimestamp = dateFormatter.string(from: Date())
+            // Build pattern list for rotation
+            var allPatterns:
+                [(type: String, fft: FFTLoadLevel, name: String, tick: UInt64?, pattern: [UInt64]?)] =
+                    []
 
-                // Part 1: Static Patterns
-                print("  [Static 12 patterns]")
-                for fftLevel in FFTLoadLevel.allCases {
-                    for (tickName, tick) in tickConfigs {
-                        var data = [Int]()
-                        for _ in 0..<iterations {
-                            data.append(measureSingle(tick: tick, fftLevel: fftLevel))
-                        }
-
-                        let stats = quickAnalyze(data: data)
-
-                        let csvLine =
-                            "\(runTimestamp),\(hour),\(minute),Static,\(fftLevel.rawValue),Tick\(tickName),\(String(format: "%.2f", stats.avg)),\(String(format: "%.2f", stats.stdDev)),\(stats.peak),\(String(format: "%.2f", stats.peakPercent))\n"
-
-                        if let fileHandle = FileHandle(forWritingAtPath: logPath) {
-                            fileHandle.seekToEndOfFile()
-                            fileHandle.write(csvLine.data(using: .utf8)!)
-                            fileHandle.closeFile()
-                        }
-                    }
-                }
-
-                // Part 2: Dynamic Patterns
-                print("  [Dynamic 20 patterns]")
-                for fftLevel in FFTLoadLevel.allCases {
-                    for (patternName, pattern) in dynamicPatterns {
-                        var data = [Int]()
-                        for i in 0..<iterations {
-                            let tick = pattern[i % 6]
-                            data.append(measureSingle(tick: tick, fftLevel: fftLevel))
-                        }
-
-                        let stats = quickAnalyze(data: data)
-
-                        let csvLine =
-                            "\(runTimestamp),\(hour),\(minute),Dynamic,\(fftLevel.rawValue),\(patternName),\(String(format: "%.2f", stats.avg)),\(String(format: "%.2f", stats.stdDev)),\(stats.peak),\(String(format: "%.2f", stats.peakPercent))\n"
-
-                        if let fileHandle = FileHandle(forWritingAtPath: logPath) {
-                            fileHandle.seekToEndOfFile()
-                            fileHandle.write(csvLine.data(using: .utf8)!)
-                            fileHandle.closeFile()
-                        }
-                    }
+            // Static patterns
+            for fftLevel in FFTLoadLevel.allCases {
+                for (tickName, tick) in tickConfigs {
+                    allPatterns.append(
+                        (
+                            type: "Static", fft: fftLevel, name: "Tick\(tickName)", tick: tick,
+                            pattern: nil
+                        ))
                 }
             }
-            print("3 runs complete. Waiting for next schedule...")
+            // Dynamic patterns
+            for fftLevel in FFTLoadLevel.allCases {
+                for (patternName, pattern) in dynamicPatterns {
+                    allPatterns.append(
+                        (
+                            type: "Dynamic", fft: fftLevel, name: patternName, tick: nil,
+                            pattern: pattern
+                        ))
+                }
+            }
+
+            while Date() < scanEndTime {
+                let p = allPatterns[patternIndex % allPatterns.count]
+                let measureTime = Date()
+                let measureTimestamp = preciseFormatter.string(from: measureTime)
+                let measureMinute = calendar.component(.minute, from: measureTime)
+                let measureSecond = calendar.component(.second, from: measureTime)
+
+                var data = [Int]()
+                if let tick = p.tick {
+                    // Static pattern
+                    for _ in 0..<iterations {
+                        data.append(measureSingle(tick: tick, fftLevel: p.fft))
+                    }
+                } else if let pattern = p.pattern {
+                    // Dynamic pattern
+                    for i in 0..<iterations {
+                        let tick = pattern[i % 6]
+                        data.append(measureSingle(tick: tick, fftLevel: p.fft))
+                    }
+                }
+
+                let stats = quickAnalyze(data: data)
+
+                let csvLine =
+                    "\(measureTimestamp),\(hour),\(measureMinute),\(p.type),\(p.fft.rawValue),\(p.name),\(String(format: "%.2f", stats.avg)),\(String(format: "%.2f", stats.stdDev)),\(stats.peak),\(String(format: "%.2f", stats.peakPercent))\n"
+
+                if let fileHandle = FileHandle(forWritingAtPath: logPath) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(csvLine.data(using: .utf8)!)
+                    fileHandle.closeFile()
+                }
+
+                // Progress indicator every 32 patterns (1 full cycle)
+                if patternIndex % 32 == 0 {
+                    print(
+                        "  [\(measureMinute):\(String(format: "%02d", measureSecond))] Cycle \(patternIndex / 32 + 1)..."
+                    )
+                }
+
+                patternIndex += 1
+            }
+
+            print("Boundary scan complete. \(patternIndex) patterns recorded.")
+            print("Waiting for next boundary...")
         }
 
         if minute != lastPrintedMinute {
-            // Next target calculation
-            // Targets: 15:45, 29:59
-            // Simplified "next" log
             print("Waiting... (Current: \(minute):\(String(format: "%02d", second)))")
             lastPrintedMinute = minute
-            Thread.sleep(forTimeInterval: 10)
         }
+
+        // Sleep 0.1s for precise second matching
+        usleep(100_000)
     }
 }
 
