@@ -234,22 +234,15 @@ void runScheduledMode(const CalibrationData &cal) {
     snprintf(timeStrBuf, sizeof(timeStrBuf), "%02d:%02d", minute, second);
     std::string timeStr = timeStrBuf;
 
-    // Schedule:
-    // [XX:10:40] Win Solo
-    // [XX:29:59] All (Sync)
-    bool isWinSolo = (minute == 10 && second == 40);
-    bool isAll = (minute == 29 && second == 59);
-
-    bool isScheduledTime = (isWinSolo || isAll);
+    // Schedule: XX:10:00, XX:29:00, XX:40:00, XX:59:00
+    bool isScheduledTime = (second == 0) && (minute == 10 || minute == 29 ||
+                                             minute == 40 || minute == 59);
 
     if (isScheduledTime && lastRunTime != timeStr) {
       lastRunTime = timeStr;
 
       std::string timestamp = getCurrentTimeStr();
-      std::string typeLabel = isWinSolo ? "WinSolo" : "All";
-
-      std::cout << "\n[[" << timestamp << "] Trigger: " << typeLabel
-                << ". Starting 3 consecutive runs...\n";
+      std::cout << "\n[[" << timestamp << "] Starting 3 consecutive runs...\n";
 
       // Run 3 times consecutively
       for (int runIndex = 1; runIndex <= 3; runIndex++) {
