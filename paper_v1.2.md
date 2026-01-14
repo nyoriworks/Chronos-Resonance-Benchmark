@@ -213,7 +213,7 @@ This represents the first experimental evidence of **quantum computational advan
   year         = 2026,
   publisher    = {Zenodo},
   version      = {1.2},
-  doi          = {10.5281/zenodo.XXXXXXXX}
+  doi          = {10.5281/zenodo.18237800}
 }
 ```
 
