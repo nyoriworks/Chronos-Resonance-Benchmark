@@ -1,6 +1,6 @@
 # Chronos Resonance: The 3.6 Microsecond Quantum Window
 
-## Version 1.2 — Time Rotation and Quantum Computational Advantage
+## Version 3 — Time Rotation and Quantum Computational Advantage
 
 > *"Time does not flow — it rotates. At 277.3 kHz. Always."*
 
