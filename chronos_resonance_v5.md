@@ -423,7 +423,7 @@ The NG Theory provides a complete, closed-form model of the universe:
 
 **Appendix: Verification**
 
-- **Source Code:** [Zenodo 18227669](https://zenodo.org/records/18227669)
+- **Source Code:** [Zenodo 18206934](https://zenodo.org/records/18206934)
 - **Application:** [![Download on the App Store](https://devimages-cdn.apple.com/app-store/marketing/guidelines/images/badge-download-on-the-app-store.svg)](https://apps.apple.com/app/gods-dice/id6757973296)
 - **Resonance Data:** 277.3 kHz stability verified across 5 independent runs
 
