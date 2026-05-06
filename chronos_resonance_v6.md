@@ -535,8 +535,6 @@ $$
 ## 10. Summary of Key Equations
 
 $$
-\boxed{
-\begin{aligned}
 \text{Nucleus:} \quad & \frac{\pi^9}{e^8} \approx 10 \\[0.8em]
 \text{Light:} \quad & c = \ln 2 \cdot \frac{10^{10}}{e^\pi} = \ln(2^{32}) \cdot \frac{\pi^{72}}{e^{66}} \\[0.8em]
 \text{Fine structure:} \quad & \alpha^{-1} = \left(\frac{\pi}{e}\right)^{34} = 36\pi + K_{4D} = 65 + 72 \\[0.8em]
@@ -547,8 +545,6 @@ $$
 \text{Loop:} \quad & E + A = 585, \quad 585 \bmod 144 = A \\[0.8em]
 \text{Bridge:} \quad & \frac{D}{\alpha^{-1}} = \left(\frac{\pi}{e}\right)^{1/3} \\[0.8em]
 \text{Derivability:} \quad & e^2 = \frac{10^4}{\pi^2(\alpha^{-1} + 12\alpha)}
-\end{aligned}
-}
 $$
 
 ---
