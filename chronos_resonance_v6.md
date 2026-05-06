@@ -643,12 +643,15 @@ Here, the decimal scale multiplier $100$ ($10^2$) acts as a direct shadow of the
 
 ## 13. Conclusion
 
-The universe computes its constants from $\pi^9/e^8 \approx 10$. The hierarchy $9 \to 16 \to 36 \to 144 \to 576$ obeys a conservation law ($d \times p = 144$), and the four forces are bit-depth levels of a single information-processing architecture.
+The universe computes its constants from $\pi^9/e^8 \approx 10$. 
+The hierarchy $9 \to 16 \to 36 \to 144 \to 576$ obeys a conservation law ($d \times p = 144$), and the four forces are bit-depth levels of a single information-processing architecture.
 
 The most striking results:
 
 $$
-\alpha^{-1} \approx \left(\frac{\pi}{e}\right)^{34}, \qquad D \approx \left(\frac{\pi}{e}\right)^{(e+\pi)^2}, \qquad \frac{D}{\alpha^{-1}} \approx \left(\frac{\pi}{e}\right)^{1/3}
+\alpha^{-1} \approx \left(\frac{\pi}{e}\right)^{34},
+\qquad D \approx \left(\frac{\pi}{e}\right)^{(e+\pi)^2}, 
+\qquad \frac{D}{\alpha^{-1}} \approx \left(\frac{\pi}{e}\right)^{1/3}
 $$
 
 $$
