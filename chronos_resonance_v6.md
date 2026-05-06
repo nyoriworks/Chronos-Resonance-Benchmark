@@ -536,28 +536,21 @@ $$
 
 $$
 \boxed{
-\begin{aligned}
-&\text{Nucleus:}\\
-&\quad \frac{\pi^9}{e^8} \approx 10 \\[0.6em]
-&\text{Light:}\\
-&\quad \begin{aligned} c &= \ln 2 \cdot \frac{10^{10}}{e^\pi} \\ &= \ln(2^{32}) \cdot \frac{\pi^{72}}{e^{66}} \end{aligned} \\[0.6em]
-&\text{Fine structure:}\\
-&\quad \begin{aligned} \alpha^{-1} &= \left(\frac{\pi}{e}\right)^{34} \\ &= 36\pi + K_{4D} = 65 + 72 \end{aligned} \\[0.6em]
-&\text{Planck:}\\
-&\quad \hbar = \frac{(E + \pi)^2 \pi}{10^{40}} \\[0.6em]
-&\text{Dimensionality:}\\
-&\quad D = \left(\frac{\pi}{e}\right)^{(e+\pi)^2} = 144 \\[0.6em]
-&\text{Mass ratio:}\\
-&\quad \begin{aligned} \frac{m_p}{m_e} &= e^8 \cdot \ln\!\sqrt{EA} \cdot \frac{D}{10^3} \\ &= e^{\pi!} \cdot \ln 4 \end{aligned} \\[0.6em]
-&\text{Conservation:}\\
-&\quad d \times p = 144 \quad \forall \text{ layers} \\[0.6em]
-&\text{Loop:}\\
-&\quad E + A = 585, \;\; 585 \bmod 144 = A \\[0.6em]
-&\text{Bridge:}\\
-&\quad \frac{D}{\alpha^{-1}} = \left(\frac{\pi}{e}\right)^{1/3} \\[0.6em]
-&\text{Derivability:}\\
-&\quad e^2 = \frac{10^4}{\pi^2(\alpha^{-1} + 12\alpha)}
-\end{aligned}
+\begin{array}{l}
+\text{Nucleus: } \frac{\pi^9}{e^8} \approx 10 \\
+\text{Light: } c = \ln 2 \cdot \frac{10^{10}}{e^\pi} \\
+\quad = \ln(2^{32}) \cdot \frac{\pi^{72}}{e^{66}} \\
+\text{Fine structure: } \alpha^{-1} = \left(\frac{\pi}{e}\right)^{34} \\
+\quad = 36\pi + K_{4D} = 65 + 72 \\
+\text{Planck: } \hbar = \frac{(E + \pi)^2 \pi}{10^{40}} \\
+\text{Dimensionality: } D = \left(\frac{\pi}{e}\right)^{(e+\pi)^2} = 144 \\
+\text{Mass ratio: } \frac{m_p}{m_e} = e^8 \cdot \ln\!\sqrt{EA} \cdot \frac{D}{10^3} \\
+\quad = e^{\pi!} \cdot \ln 4 \\
+\text{Conservation: } d \times p = 144 \quad \forall \text{ layers} \\
+\text{Loop: } E + A = 585, \;\; 585 \bmod 144 = A \\
+\text{Bridge: } \frac{D}{\alpha^{-1}} = \left(\frac{\pi}{e}\right)^{1/3} \\
+\text{Derivability: } e^2 = \frac{10^4}{\pi^2(\alpha^{-1} + 12\alpha)}
+\end{array}
 }
 $$
 
