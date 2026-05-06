@@ -540,18 +540,15 @@ $$
 &\text{Nucleus:}\\
 &\quad \frac{\pi^9}{e^8} \approx 10 \\[0.6em]
 &\text{Light:}\\
-&\quad c = \ln 2 \cdot \frac{10^{10}}{e^\pi} \\
-&\quad \phantom{c} = \ln(2^{32}) \cdot \frac{\pi^{72}}{e^{66}} \\[0.6em]
+&\quad \begin{aligned} c &= \ln 2 \cdot \frac{10^{10}}{e^\pi} \\ &= \ln(2^{32}) \cdot \frac{\pi^{72}}{e^{66}} \end{aligned} \\[0.6em]
 &\text{Fine structure:}\\
-&\quad \alpha^{-1} = \left(\frac{\pi}{e}\right)^{34} \\
-&\quad \phantom{\alpha^{-1}} = 36\pi + K_{4D} = 65 + 72 \\[0.6em]
+&\quad \begin{aligned} \alpha^{-1} &= \left(\frac{\pi}{e}\right)^{34} \\ &= 36\pi + K_{4D} = 65 + 72 \end{aligned} \\[0.6em]
 &\text{Planck:}\\
 &\quad \hbar = \frac{(E + \pi)^2 \pi}{10^{40}} \\[0.6em]
 &\text{Dimensionality:}\\
 &\quad D = \left(\frac{\pi}{e}\right)^{(e+\pi)^2} = 144 \\[0.6em]
 &\text{Mass ratio:}\\
-&\quad \frac{m_p}{m_e} = e^8 \cdot \ln\!\sqrt{EA} \cdot \frac{D}{10^3} \\
-&\quad \phantom{\frac{m_p}{m_e}} = e^{\pi!} \cdot \ln 4 \\[0.6em]
+&\quad \begin{aligned} \frac{m_p}{m_e} &= e^8 \cdot \ln\!\sqrt{EA} \cdot \frac{D}{10^3} \\ &= e^{\pi!} \cdot \ln 4 \end{aligned} \\[0.6em]
 &\text{Conservation:}\\
 &\quad d \times p = 144 \quad \forall \text{ layers} \\[0.6em]
 &\text{Loop:}\\
