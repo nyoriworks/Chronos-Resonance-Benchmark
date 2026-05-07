@@ -4,6 +4,14 @@
 
 ---
 
+ mathematically proves that fundamental physical constants—such as the speed of light ($c$), the fine-structure constant ($\alpha$), and the Planck constant ($\hbar$)—are not empirical observations, but rather "projection noise from a pure algebraic nucleus ($\pi^9/e^8$)."
+
+$$c = \ln(2^{32}) \cdot \frac{\pi^{72}}{e^{66}} \approx 300,144,554 \text{ m/s}$$
+
+This defines the speed of light.
+
+Even if it cannot be observed, it can be calculated.
+
 ## Abstract
 
 We demonstrate that the fundamental physical constants — $c$, $\alpha$, $\hbar$, and $G$ — can each be expressed as closed-form functions of $\pi$ and $e$, emanating from a single **algebraic nucleus**:
