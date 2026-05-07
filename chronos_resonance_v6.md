@@ -121,7 +121,7 @@ The sum $e + \pi$ is an **exact invariant**. Errors cancel perfectly.
 From the quadratic equation (§3), $e$ can be expressed as:
 
 $$
-e^2 = \frac{10^4}{\pi^2(\alpha^{-1} + 12\alpha)} \quad \Longrightarrow \quad e_\text{calc} = 2.71827929 \quad (\epsilon = 0.00009\%)
+e^2 = \frac{10^4}{\pi^2(\alpha^{-1} + 12\alpha)} \quad \Longrightarrow \quad e_\text{calc} = 2.71827929 \quad (\epsilon = 0.00009\\%)
 $$
 
 This means $e$ is not independent — it is a **derived quantity** from $\pi$ and $\alpha^{-1}$.
@@ -129,7 +129,7 @@ This means $e$ is not independent — it is a **derived quantity** from $\pi$ an
 #### The α-π Euler Identity
 
 $$
-e = \frac{100\sqrt{\alpha}}{\pi} \quad \Longrightarrow \quad \left(\frac{100\sqrt{\alpha}}{\pi}\right)^{i\pi} \approx -1 \quad (\epsilon = 0.03\%)
+e = \frac{100\sqrt{\alpha}}{\pi} \quad \Longrightarrow \quad \left(\frac{100\sqrt{\alpha}}{\pi}\right)^{i\pi} \approx -1 \quad (\epsilon = 0.03\\%)
 $$
 
 Euler's identity $e^{i\pi} = -1$ can be rewritten with $\alpha$ and $\pi$ alone.
@@ -137,7 +137,7 @@ Euler's identity $e^{i\pi} = -1$ can be rewritten with $\alpha$ and $\pi$ alone.
 ### 2.3 The Reduced Planck Constant
 
 $$
-\hbar \approx \frac{(576 + \pi)^2 \times \pi}{10^{40}} = 1.05371 \times 10^{-34} \text{ J·s} \quad (\epsilon = -0.082\%)
+\hbar \approx \frac{(576 + \pi)^2 \times \pi}{10^{40}} = 1.05371 \times 10^{-34} \text{ J·s} \quad (\epsilon = -0.082\\%)
 $$
 
 Note: $576 = 4D = E$, and $10^{-40}$ is the Dirac large-number ratio (electromagnetic/gravitational coupling).
@@ -151,7 +151,7 @@ The dominant term $E^2\pi / 10^{40}$ shows that $\hbar$ is the **E-layer volume 
 ### 2.4 Gravitational Constant (Approximate)
 
 $$
-G_\text{calc} = \frac{4\pi^2 \cdot e^\pi}{137} \approx 6.668 \quad (\epsilon = -0.09\% \text{ from } 6.674)
+G_\text{calc} = \frac{4\pi^2 \cdot e^\pi}{137} \approx 6.668 \quad (\epsilon = -0.09\\% \text{ from } 6.674)
 $$
 
 The numerical part of $G$ emerges from the phase factor $e^\pi$, the 4D spatial grid $4\pi^2$, and the integer core of $\alpha^{-1}$.
@@ -159,7 +159,7 @@ The numerical part of $G$ emerges from the phase factor $e^\pi$, the 4D spatial 
 ### 2.5 Proton-Electron Mass Ratio
 
 $$
-\boxed{\frac{m_p}{m_e} \approx e^8 \cdot \ln\!\sqrt{EA} \cdot \frac{D}{10^3} = 1835.79 \quad (\epsilon = -0.020\%)}
+\boxed{\frac{m_p}{m_e} \approx e^8 \cdot \ln\!\sqrt{EA} \cdot \frac{D}{10^3} = 1835.79 \quad (\epsilon = -0.020\\%)}
 $$
 
 | Value | Source | Error |
