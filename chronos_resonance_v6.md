@@ -12,7 +12,7 @@ $$
 \boxed{\frac{\pi^9}{e^8} \approx 10 \quad (\text{error: } 0.016\\\%)}
 $$
 
-This nucleus eliminates the integer "10" from physics entirely: what we call the decimal system is not a human invention but a shadow of $\pi^9/e^8$. The resulting errors ($0.057\%$–$0.17\%$) cluster at a uniform scale, fingerprinting the shared residual $\delta = \pi^9/e^8 - 10$.
+This nucleus eliminates the integer "10" from physics entirely: what we call the decimal system is not a human invention but a shadow of $\pi^9/e^8$. The resulting errors ($0.057\\%$–$0.17\\%$) cluster at a uniform scale, fingerprinting the shared residual $\delta = \pi^9/e^8 - 10$.
 
 The dimensionality $D = 144$ and $\alpha^{-1} \approx 137$ are unified through:
 
@@ -56,7 +56,7 @@ Both sides share the same kernel. The proof is purely algebraic.
 ### 2.1 The Speed of Light
 
 $$
-c = \ln 2 \times \frac{10^{10}}{e^\pi} \approx 299{,}536{,}056 \text{ m/s} \quad (\epsilon = -0.086\%)
+c = \ln 2 \times \frac{10^{10}}{e^\pi} \approx 299{,}536{,}056 \text{ m/s} \quad (\epsilon = -0.086\\%)
 $$
 
 Substituting $10 = \pi^9/e^8$ eliminates all integers:
