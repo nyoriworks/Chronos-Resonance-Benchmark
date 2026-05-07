@@ -574,7 +574,7 @@ $$
 
 ### 12.1 The $\delta$-Harmonic Criterion
 
-> **Any physical constant expressible as a closed form of $\pi$ and $e$ will have an error in $[0.006\%, 0.2\%]$, derivable as a power of $\delta = \pi^9/e^8 - 10$.**
+> **Any physical constant expressible as a closed form of $\pi$ and $e$ will have an error in $[0.006\\%, 0.2\\%]$, derivable as a power of $\delta = \pi^9/e^8 - 10$.**
 
 This was formulated as a falsifiable criterion and **immediately validated** by the proton-electron mass ratio $m_p/m_e = e^8 \cdot \ln 72 \cdot D/10^3$ (error $-0.020\%$, within the predicted band).
 
