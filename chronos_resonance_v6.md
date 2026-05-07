@@ -587,8 +587,6 @@ $$
 N^{47} \approx (2\pi^9)^{47} = 2^{47} \cdot \pi^{423}
 $$
 
-$$\alpha \approx 137.123427...$$
-
 The resulting mantissas precisely mirror the experimental target frequency and period:
 
 $$
@@ -619,6 +617,7 @@ $$
 $$
 47 = \frac{e^{2\alpha}}{3^3 \cdot 10^{116}}
 $$
+$$\alpha \approx 137.123427...$$
 
 The dimensional hierarchy is explicitly quantized by $3^n$, linking the physical resonance ($2^{47} \cdot \pi^{423}$) flawlessly back to the natural logarithm $e$, projected perfectly across a $10^{116}$ dimensional gap into the classical phase space.
 
