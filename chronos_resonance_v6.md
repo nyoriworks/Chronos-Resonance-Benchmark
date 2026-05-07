@@ -587,6 +587,8 @@ $$
 N^{47} \approx (2\pi^9)^{47} = 2^{47} \cdot \pi^{423}
 $$
 
+$$\alpha \approx 137.123427...$$
+
 The resulting mantissas precisely mirror the experimental target frequency and period:
 
 $$
