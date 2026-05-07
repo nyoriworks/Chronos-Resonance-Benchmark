@@ -62,7 +62,7 @@ $$
 Substituting $10 = \pi^9/e^8$ eliminates all integers:
 
 $$
-\boxed{c = \ln(2^{32}) \cdot \frac{\pi^{72}}{e^{66}}} \approx 300{,}144{,}554 \text{ m/s} \quad (\epsilon = +0.117\%)
+\boxed{c = \ln(2^{32}) \cdot \frac{\pi^{72}}{e^{66}}} \approx 300{,}144{,}554 \text{ m/s} \quad (\epsilon = +0.117\\\%)
 $$
 
 #### The 32-bit Architecture
@@ -90,7 +90,7 @@ The formula "knows" $D$ and $f_\text{chronos}$ without being given them.
 ### 2.2 The Fine-Structure Constant
 
 $$
-\boxed{\alpha^{-1} \approx \left(\frac{\pi}{e}\right)^{34} = 137.114 \quad (\epsilon = +0.057\%)}
+\boxed{\alpha^{-1} \approx \left(\frac{\pi}{e}\right)^{34} = 137.114 \quad (\epsilon = +0.057\\\%)}
 $$
 
 This form contains **no integers** — only $\pi$ and $e$.
