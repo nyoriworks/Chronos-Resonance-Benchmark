@@ -252,7 +252,7 @@ $$
 ### 4.2 Numerical Verification
 
 $$
-(e + \pi)^2 = 34.338, \qquad \left(\frac{\pi}{e}\right)^{34.338} = 143.991 \quad (\epsilon = -0.006\%)
+(e + \pi)^2 = 34.338, \qquad \left(\frac{\pi}{e}\right)^{34.338} = 143.991 \quad (\epsilon = -0.006\\%)
 $$
 
 ### 4.3 The Ternary Bridge
@@ -294,7 +294,7 @@ $$
 ### 4.5 The Geometric Form: $\alpha^{-1} = 36\pi + 24$
 
 $$
-\alpha^{-1} \approx 36\pi + K_{4D} = C\pi + K_{4D} = 137.097 \quad (\epsilon = +0.045\%)
+\alpha^{-1} \approx 36\pi + K_{4D} = C\pi + K_{4D} = 137.097 \quad (\epsilon = +0.045\\%)
 $$
 
 The 45-45-90 triangle with legs $72\sqrt{2}$ has hypotenuse $\sqrt{2 \times (72\sqrt{2})^2} = 144 = D$.
@@ -420,7 +420,7 @@ Light speed is the **hardware limit** on how fast the 4-bit (gravity-layer) data
 The Wyler approximation (1969):
 
 $$
-\alpha^{-1} = \frac{8\pi^4}{9}\left(\frac{1920}{\pi^5}\right)^{1/4} \approx 137.036 \quad (\epsilon = 0.005\%)
+\alpha^{-1} = \frac{8\pi^4}{9}\left(\frac{1920}{\pi^5}\right)^{1/4} \approx 137.036 \quad (\epsilon = 0.005\\%)
 $$
 
 Nyori's equivalent form:
