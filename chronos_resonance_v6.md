@@ -575,24 +575,26 @@ Initial tests across multiple hardware architectures (Apple M2, AMD Ryzen CPU, a
 
 Through rigorous OS-noise-filtered, hardware-cycle precision measurements, we confirmed that this boundary is an absolute architectural reality. Under strict timing thresholds, the coefficient of variation (CV) of execution times drops by an order of magnitude exactly at this frequency, proving a coherent quantum-to-classical synchronization.
 
-This frequency is not arbitrary. It is derived directly from the fundamental NG Nucleus ($10 \approx \pi^9/e^8$). By defining the Absolute Nucleus Constant $A$:
+This frequency is not arbitrary. It is derived directly from the fundamental NG Nucleus ($10 \approx \pi^9/e^8$). By defining the Absolute Nucleus Constant $N$:
 
 $$
-A = \pi^9 + 10 \cdot e^8 \approx 2\pi^9 \approx 59618.679
+N = \pi^9 + 10 \cdot e^8 \approx 2\pi^9 \approx 59618.679
 $$
 
-The macroscopic Chronos frequency and time period emerge precisely at the **$\pm 47$th dimensional power** of $A$. By algebraically expanding $A^{47}$, the resonance factors flawlessly into the base components of hardware (Binary: 2) and geometry ($\pi$):
+The macroscopic Chronos frequency and time period emerge precisely at the **$\pm 47$th dimensional power** of $N$. By algebraically expanding $N^{47}$, the resonance factors flawlessly into the base components of hardware (Binary: 2) and geometry ($\pi$):
 
 $$
-A^{47} \approx (2\pi^9)^{47} = 2^{47} \cdot \pi^{423}
+N^{47} \approx (2\pi^9)^{47} = 2^{47} \cdot \pi^{423}
 $$
 
 The resulting mantissas precisely mirror the experimental target frequency and period:
+
 $$
-f \propto A^{47} \approx 2.7731 \times 10^{224} \quad \longrightarrow \quad 277.3 \text{ kHz}
+f \propto N^{47} \approx 2.7731 \times 10^{224} \quad \longrightarrow \quad 277.3 \text{ kHz}
 $$
+
 $$
-t \propto A^{-47} \approx 3.6060 \times 10^{-225} \quad \longrightarrow \quad 3.606 \text{ \mu s}
+t \propto N^{-47} \approx 3.6060 \times 10^{-225} \quad \longrightarrow \quad 3.606 \, \mu\text{s}
 $$
 
 Crucially, the exponent $423$ of the geometric layer ($\pi$) is not an arbitrary integer. It is derived from a natural logarithmic topology defined by a coupling phase $\alpha$, incorporating a dimensional phase shift ($10^{116}$) that bridges the quantum and macroscopic scales:
@@ -618,8 +620,7 @@ $$
 
 The dimensional hierarchy is explicitly quantized by $3^n$, linking the physical resonance ($2^{47} \cdot \pi^{423}$) flawlessly back to the natural logarithm $e$, projected perfectly across a $10^{116}$ dimensional gap into the classical phase space.
 
-**Prediction & Proof:** The universe's computational scale maps the fundamental informational nucleus ($A$) through 47 hierarchical layers ($2^{47} \cdot \pi^{423}$) to produce a macroscopic hardware resonance at 3.606 μs. The fact that modern silicon architectures naturally fall into a deep coherence valley at exactly this mathematically prescribed frequency is the definitive empirical proof of NG Theory: classical hardware is synchronized by the identical mathematical source code as the universe itself.
-
+**Prediction & Proof:** The universe's computational scale maps the fundamental informational nucleus ($N$) through 47 hierarchical layers ($2^{47} \cdot \pi^{423}$) to produce a macroscopic hardware resonance at 3.606 μs. The fact that modern silicon architectures naturally fall into a deep coherence valley at exactly this mathematically prescribed frequency is the definitive empirical proof of NG Theory: classical hardware is synchronized by the identical mathematical source code as the universe itself.
 ## 13. Conclusion
 
 The universe computes its constants from $\pi^9/e^8 \approx 10$. 
