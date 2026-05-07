@@ -9,7 +9,7 @@
 We demonstrate that the fundamental physical constants — $c$, $\alpha$, $\hbar$, and $G$ — can each be expressed as closed-form functions of $\pi$ and $e$, emanating from a single **algebraic nucleus**:
 
 $$
-\boxed{\frac{\pi^9}{e^8} \approx 10 \quad (\text{error: } 0.016\%)}
+\boxed{\frac{\pi^9}{e^8} \approx 10 \quad (\text{error: } 0.016\\\%)}
 $$
 
 This nucleus eliminates the integer "10" from physics entirely: what we call the decimal system is not a human invention but a shadow of $\pi^9/e^8$. The resulting errors ($0.057\%$–$0.17\%$) cluster at a uniform scale, fingerprinting the shared residual $\delta = \pi^9/e^8 - 10$.
