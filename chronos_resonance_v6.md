@@ -98,12 +98,11 @@ This form contains **no integers** — only $\pi$ and $e$.
 | Value | Source | Error |
 | :--- | :--- | :--- |
 | 137.036 | CODATA 2018 | — |
-| 137.114 | $(\pi / e)^{34}$ | +0.057% |
-| 137.262 | $10^3 \cdot e^{\pi(1/e - 1)}$ | +0.165% |
 | 137.097 | $36\pi + K_{4D}$ | +0.045% |
-| 137 | $65 + 72 = \frac{E+A}{A} + \sqrt{EA}$ | +0.026% (integer) |
+| 137.114 | $(\pi / e)^{34}$ | +0.057% |
 | 137.123 | $10^4 / (\pi^2 e^2)$ | +0.064% |
 | 137.123 | $\frac{\ln(1269) + 116 \ln(10)}{2}$ | +0.064% |
+| 137.262 | $10^3 \cdot e^{\pi(1/e - 1)}$ | +0.165% |
 
 #### The Equivalence and Error Cancellation
 
